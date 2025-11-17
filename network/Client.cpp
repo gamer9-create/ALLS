@@ -3,11 +3,13 @@
 //
 
 #include "Client.h"
-
+#include "raymath.h"
 #include <array>
+#include <cstring>
 #include <iostream>
 #include <string>
 #include <thread>
+#include <vector>
 
 #include "enet/enet.h"
 
@@ -15,6 +17,7 @@ std::atomic<bool> Running;
 
 ENetHost* client = {0};
 ENetPeer* peer = {0};
+std::vector<Vector2> client_positions;
 
 void ClientThread(std::string IPAddress, int Port) {
     printf("yo everybody hush we startin the client\n");
@@ -55,6 +58,8 @@ void ClientThread(std::string IPAddress, int Port) {
       }
     printf("MAX RIZZ\n");
 
+    int number_of_floats = 0;
+    std::vector<Vector2> floats;
     while (Running.load(std::memory_order_relaxed)) {
         int active = enet_host_service(client, &client_event, 500);
         if (active > 0) {
@@ -62,7 +67,16 @@ void ClientThread(std::string IPAddress, int Port) {
                 case ENET_EVENT_TYPE_CONNECT:
                     break;
                 case ENET_EVENT_TYPE_RECEIVE:
-                    std::cout << "length: " << client_event.packet->dataLength << std::endl;
+                    number_of_floats = (int) (client_event.packet->dataLength / 4);
+                    floats.clear();
+                    for (int i = 0; i < number_of_floats; i++) {
+                        float x, y;
+                        int idx = i * 4;
+                        std::memcpy(&x, client_event.packet->data + idx, 4);
+                        std::memcpy(&y, client_event.packet->data + idx + 4, 4);
+                        floats.push_back({x,y});
+                    }
+                    client_positions = floats;
                     enet_packet_destroy(client_event.packet);
                     break;
                 case ENET_EVENT_TYPE_DISCONNECT:
@@ -92,6 +106,10 @@ void UpdatePosition(float x, float y) {
         enet_peer_send(peer, 0, packet);
         //enet_packet_destroy(packet);
     }
+}
+
+std::vector<Vector2> GetPositions() {
+    return client_positions;
 }
 
 void StopClient() {

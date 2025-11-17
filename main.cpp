@@ -15,6 +15,7 @@ void client() {
     while (!WindowShouldClose()) {
         BeginDrawing();
         ClearBackground(WHITE);
+        DrawText(std::to_string(GetTime()).c_str(), 0, 0, 20, BLACK);
 
         Vector2 Movement = {0, 0};
         if (IsKeyDown(KEY_A))
@@ -23,15 +24,19 @@ void client() {
             Movement.x += 1;
         if (IsKeyDown(KEY_W))
             Movement.y -= 1;
-        if (IsKeyDown(KEY_D))
-            Movement.y -= 1;
+        if (IsKeyDown(KEY_S))
+            Movement.y += 1;
         Movement = Vector2Normalize(Movement);
-        MyPlayerHitbox.x += Movement.x * MyPlayerSpeed;
-        MyPlayerHitbox.y += Movement.y * MyPlayerSpeed;
-
-        DrawRectangleRec(MyPlayerHitbox, RED);
+        MyPlayerHitbox.x += Movement.x * MyPlayerSpeed * GetFrameTime();
+        MyPlayerHitbox.y += Movement.y * MyPlayerSpeed * GetFrameTime();
 
         UpdatePosition(MyPlayerHitbox.x, MyPlayerHitbox.y);
+
+        std::vector<Vector2> positions = GetPositions();
+        positions.push_back({MyPlayerHitbox.x, MyPlayerHitbox.y});
+        for (Vector2 position : positions) {
+            DrawRectangle(position.x, position.y, 40, 40, RED);
+        }
 
         EndDrawing();
     }
