@@ -6,7 +6,7 @@
 #define SERVER_H
 #include <string>
 
-bool StartServer(std::string IPAddress = "127.0.0.1", int Port = 5000, int MaxClients = 32);
+void StartServer(std::string IPAddress = "127.0.0.1", int Port = 5000, int MaxClients = 32);
 void StopServer();
 
 #endif //SERVER_H

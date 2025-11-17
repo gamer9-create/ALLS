@@ -4,70 +4,91 @@
 
 #include "Server.h"
 #include <iostream>
+#include <raymath.h>
 #include <unordered_map>
 #include "enet/enet.h"
 
-ENetAddress address;
-ENetEvent event;
-ENetHost* server;
+ENetHost* server = {0};
+bool Running = true;
+std::unordered_map<enet_uint32, ENetPeer*> peers;
+std::unordered_map<enet_uint32, Vector2> positions;
 
-bool StartServer(std::string IPAddress, int Port, int MaxClients) {
-    enet_initialize();
-    atexit(enet_deinitialize);
+void SendPositions() {
+    while (Running) {
+        if (server != NULL) {
+            for (auto [id, peer] : peers) {
 
-    enet_address_set_host_ip(&address, IPAddress.c_str());
-    address.port = Port;
+                for (auto [other_id, other_peer] : peers) {
+                    if (other_id != id) {
 
-    server = enet_host_create(&address, MaxClients, 2, 0, 0);
+                    }
+                }
+            }
+        }
+    }
+}
+
+void StartServer(std::string IPAddress, int Port, int MaxClients) {
+    Running = true;
+    if (enet_initialize() != 0) {
+        fprintf(stderr, "An error occurred while initializing ENet.\n");
+    }
+    //atexit(enet_deinitialize);
+
+    ENetAddress server_address = {0};
+    ENetEvent server_event;
+
+    enet_address_set_host_ip(&server_address, IPAddress.c_str());
+    server_address.port = Port;
+
+    server = enet_host_create(&server_address, MaxClients, 2, 0, 0);
 
     if (server == NULL) {
         std::cout << "Error creating server\n";
-        return false;
     }
 
     std::cout << "Starting server...\n";
 
-    std::unordered_map<enet_uint32, ENetPeer*> peers;
-
     const char* s = "Client information";
-    while (true) {
-        int active = enet_host_service(server, &event, 1000);
+    while (Running) {
+        int active = enet_host_service(server, &server_event, 1000);
         if (active > 0) {
-            switch (event.type) {
+            switch (server_event.type) {
                 case ENET_EVENT_TYPE_CONNECT:
-                    printf("A new client connected from %x:%u.\n",  event.peer->address.host, event.peer->address.port);
+                    printf("A new client connected from %x:%u.\n",  server_event.peer->address.host, server_event.peer->address.port);
 
-                    peers[event.peer->connectID] = event.peer;
-                    event.peer->data = &s;
-                    std::cout << "added " << event.peer->connectID << "\n";
+                    peers[server_event.peer->connectID] = server_event.peer;
+                    positions[server_event.peer->connectID]= {0,0};
+                    server_event.peer->data = &s;
+                    std::cout << "added " << server_event.peer->connectID << "\n";
                     break;
 
                 case ENET_EVENT_TYPE_RECEIVE:
-                    printf("A packet of length %lu containing %s was received from %s on channel %u.\n",
-                            event.packet->dataLength,
-                            event.packet->data,
-                            event.peer->data,
-                            event.channelID);
-                    enet_packet_destroy (event.packet);
+                    float x, y;
+                    std::memcpy(&x, server_event.packet->data, 4);
+                    std::memcpy(&y, server_event.packet->data + 4, 4);
+                    positions[server_event.peer->connectID]= {x,y};
+                    enet_packet_destroy (server_event.packet);
                     break;
 
                 case ENET_EVENT_TYPE_DISCONNECT:
-                    printf("%s disconnected.\n", event.peer->data);
+                    printf("disconnected.\n");
                     /* Reset the peer's client information. */
-                    event.peer->data = NULL;
-                    peers.erase(event.peer->connectID);
+                    server_event.peer->data = NULL;
+                    peers.erase(server_event.peer->connectID);
+                    positions.erase(server_event.peer->connectID);
                     break;
 
                 case ENET_EVENT_TYPE_NONE:
                     break;
             }
         }
-
     }
-    return true;
 }
 
 void StopServer() {
-    enet_host_destroy(server);
+    if (server != nullptr) {
+        enet_host_destroy(server);
+    }
     enet_deinitialize();
 }
