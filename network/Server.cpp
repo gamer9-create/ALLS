@@ -18,6 +18,10 @@ bool ServerRunning = true;
 std::unordered_map<enet_uint32, ENetPeer*> peers;
 std::unordered_map<enet_uint32, Vector2> positions;
 
+struct {
+
+};
+
 void SendPositions() {
     while (ServerRunning) {
         if (server != NULL) {
@@ -29,7 +33,7 @@ void SendPositions() {
                     }
                 }
                 if (otherPlayerPositions.size() > 0) {
-                    ENetPacket* packet = enet_packet_create(otherPlayerPositions.data(), otherPlayerPositions.size()*sizeof(Vector2), ENET_PACKET_FLAG_RELIABLE);
+                    ENetPacket* packet = enet_packet_create(otherPlayerPositions.data(), otherPlayerPositions.size()*sizeof(Vector2), ENET_PACKET_FLAG_UNRELIABLE_FRAGMENT );
                     enet_peer_send(peer, 0, packet);
                 }
             }
