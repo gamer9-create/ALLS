@@ -67,7 +67,7 @@ void ClientThread(std::string IPAddress, int Port) {
                 case ENET_EVENT_TYPE_CONNECT:
                     break;
                 case ENET_EVENT_TYPE_RECEIVE:
-                    number_of_floats = (int) (client_event.packet->dataLength / 4);
+                    number_of_floats = (int) (sizeof(client_event.packet->data) / 4);
                     floats.clear();
                     for (int i = 0; i < number_of_floats/2; i++) {
                         float x, y;
@@ -99,8 +99,8 @@ void StartClient(std::string IPAddress, int Port) {
 void UpdatePosition(float x, float y) {
     if (peer != nullptr && client != nullptr) {
         std::array<uint8_t, 8> position;
-        position[0] = x;
-        position[1] = y;
+        std::memcpy(position.data(), &x, 4);
+        std::memcpy(position.data() + 4, &y, 4);
         auto bytes = std::bit_cast<std::array<uint8_t, 8>>(position);
 
         ENetPacket* packet = enet_packet_create(&bytes, sizeof(bytes), ENET_PACKET_FLAG_RELIABLE);

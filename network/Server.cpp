@@ -29,22 +29,8 @@ void SendPositions() {
                     }
                 }
                 if (otherPlayerPositions.size() > 0) {
-                    int siz = otherPlayerPositions.size() * 8;
-                    std::cout << siz << std::endl;
-                    char position[siz];
-                    std::cout << "did it?" << std::endl;
-                    for (int i = 0; i < otherPlayerPositions.size(); i++) {
-                        int idx = i * 8;
-                        std::memcpy(&position, &otherPlayerPositions[i]+idx, siz);
-                        std::memcpy(&position, &otherPlayerPositions[i]+idx+4, siz);
-                    }
-                    std::cout <<"DEAD" << std::endl;
-                    std::cout << position << std::endl;
-                    std::cout <<"DEAD?" << std::endl;
-                    ENetPacket* packet = enet_packet_create(&position, sizeof(position), ENET_PACKET_FLAG_UNRELIABLE_FRAGMENT);
-                    std::cout <<"HOW" << std::endl;
+                    ENetPacket* packet = enet_packet_create(otherPlayerPositions.data(), otherPlayerPositions.size()*sizeof(Vector2), ENET_PACKET_FLAG_RELIABLE);
                     enet_peer_send(peer, 0, packet);
-                    std::cout <<"WTF" << std::endl;
                 }
             }
         }
@@ -90,8 +76,8 @@ void StartServer(std::string IPAddress, int Port, int MaxClients) {
                 case ENET_EVENT_TYPE_RECEIVE:
                     float x, y;
 
-                    std::memcpy(&x, &server_event.packet->data, 4);
-                    std::memcpy(&y, &server_event.packet->data + 4, 4);
+                    std::memcpy(&x, server_event.packet->data, 4);
+                    std::memcpy(&y, server_event.packet->data + 4, 4);
                     positions[server_event.peer->connectID]= {x,y};
                     enet_packet_destroy (server_event.packet);
 

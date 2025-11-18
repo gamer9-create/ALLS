@@ -12,6 +12,8 @@ void client() {
     Rectangle MyPlayerHitbox = {0, 0, 40, 40};
     float MyPlayerSpeed = 150;
 
+    Vector2 LastPosition ={0, 0};
+
     while (!WindowShouldClose()) {
         BeginDrawing();
         ClearBackground(WHITE);
@@ -30,7 +32,12 @@ void client() {
         MyPlayerHitbox.x += Movement.x * MyPlayerSpeed * GetFrameTime();
         MyPlayerHitbox.y += Movement.y * MyPlayerSpeed * GetFrameTime();
 
-        UpdatePosition(MyPlayerHitbox.x, MyPlayerHitbox.y);
+        Vector2 CurrentPosition = {MyPlayerHitbox.x, MyPlayerHitbox.y};
+
+        if (Vector2Distance(CurrentPosition, LastPosition) > 20)
+            UpdatePosition(MyPlayerHitbox.x, MyPlayerHitbox.y);
+
+        LastPosition = CurrentPosition;
 
         std::vector<Vector2> positions = GetPositions();
         positions.push_back({MyPlayerHitbox.x, MyPlayerHitbox.y});
