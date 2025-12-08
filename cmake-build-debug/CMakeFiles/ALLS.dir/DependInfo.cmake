@@ -10,6 +10,7 @@ set(CMAKE_DEPENDS_LANGUAGES
 set(CMAKE_DEPENDS_DEPENDENCY_FILES
   "C:/Users/7906200/OneDrive - Hillsborough County Public Schools/Desktop Files/Documents/GitHub/ALLS/main.cpp" "CMakeFiles/ALLS.dir/main.cpp.obj" "gcc" "CMakeFiles/ALLS.dir/main.cpp.obj.d"
   "C:/Users/7906200/OneDrive - Hillsborough County Public Schools/Desktop Files/Documents/GitHub/ALLS/network/Client.cpp" "CMakeFiles/ALLS.dir/network/Client.cpp.obj" "gcc" "CMakeFiles/ALLS.dir/network/Client.cpp.obj.d"
+  "C:/Users/7906200/OneDrive - Hillsborough County Public Schools/Desktop Files/Documents/GitHub/ALLS/network/Player.cpp" "CMakeFiles/ALLS.dir/network/Player.cpp.obj" "gcc" "CMakeFiles/ALLS.dir/network/Player.cpp.obj.d"
   "C:/Users/7906200/OneDrive - Hillsborough County Public Schools/Desktop Files/Documents/GitHub/ALLS/network/Server.cpp" "CMakeFiles/ALLS.dir/network/Server.cpp.obj" "gcc" "CMakeFiles/ALLS.dir/network/Server.cpp.obj.d"
   "C:/Users/7906200/OneDrive - Hillsborough County Public Schools/Desktop Files/Documents/GitHub/ALLS/network/Utils.cpp" "CMakeFiles/ALLS.dir/network/Utils.cpp.obj" "gcc" "CMakeFiles/ALLS.dir/network/Utils.cpp.obj.d"
   )

@@ -6,6 +6,8 @@ file(REMOVE_RECURSE
   "CMakeFiles/ALLS.dir/main.cpp.obj.d"
   "CMakeFiles/ALLS.dir/network/Client.cpp.obj"
   "CMakeFiles/ALLS.dir/network/Client.cpp.obj.d"
+  "CMakeFiles/ALLS.dir/network/Player.cpp.obj"
+  "CMakeFiles/ALLS.dir/network/Player.cpp.obj.d"
   "CMakeFiles/ALLS.dir/network/Server.cpp.obj"
   "CMakeFiles/ALLS.dir/network/Server.cpp.obj.d"
   "CMakeFiles/ALLS.dir/network/Utils.cpp.obj"

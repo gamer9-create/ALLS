@@ -67,7 +67,6 @@ void ClientThread(std::string IPAddress, int Port) {
     printf("MAX RIZZ\n");
 
     while (Running.load(std::memory_order_relaxed)) {
-        ServerTime = lerp(ServerTime, RealServerTime, 0.1f);
         int active = enet_host_service(client, &client_event, 250);
         if (active > 0) {
             switch (client_event.type) {
@@ -89,7 +88,8 @@ void ClientThread(std::string IPAddress, int Port) {
                             client_players[packet.playerJoin.id] = {
                                 packet.playerJoin.id,
                                 s,s,
-                                std::vector<double>(), GetTimeUtils(), 0.1f, s, std::vector<PlayerState>()
+                                std::vector<double>(), GetTimeUtils(), 0.1f, s, std::vector<PlayerState>(),
+
                             };
                             break;
                         }
@@ -153,6 +153,10 @@ void StartClient(std::string IPAddress, int Port) {
 
 std::unordered_map<long, Player> *GetPlayers() {
     return &client_players;
+}
+
+void InterpolateServerTime(float dt) {
+    ServerTime = lerp(ServerTime, RealServerTime, 0.1f * dt);
 }
 
 void UpdateState(PlayerState state) {

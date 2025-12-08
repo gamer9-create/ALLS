@@ -183,6 +183,30 @@ network/Client.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles\ALLS.dir\build.make CMakeFiles/ALLS.dir/network/Client.cpp.s
 .PHONY : network/Client.cpp.s
 
+network/Player.obj: network/Player.cpp.obj
+.PHONY : network/Player.obj
+
+# target to build an object file
+network/Player.cpp.obj:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\ALLS.dir\build.make CMakeFiles/ALLS.dir/network/Player.cpp.obj
+.PHONY : network/Player.cpp.obj
+
+network/Player.i: network/Player.cpp.i
+.PHONY : network/Player.i
+
+# target to preprocess a source file
+network/Player.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\ALLS.dir\build.make CMakeFiles/ALLS.dir/network/Player.cpp.i
+.PHONY : network/Player.cpp.i
+
+network/Player.s: network/Player.cpp.s
+.PHONY : network/Player.s
+
+# target to generate assembly for a file
+network/Player.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\ALLS.dir\build.make CMakeFiles/ALLS.dir/network/Player.cpp.s
+.PHONY : network/Player.cpp.s
+
 network/Server.obj: network/Server.cpp.obj
 .PHONY : network/Server.obj
 
@@ -247,6 +271,9 @@ help:
 	@echo ... network/Client.obj
 	@echo ... network/Client.i
 	@echo ... network/Client.s
+	@echo ... network/Player.obj
+	@echo ... network/Player.i
+	@echo ... network/Player.s
 	@echo ... network/Server.obj
 	@echo ... network/Server.i
 	@echo ... network/Server.s

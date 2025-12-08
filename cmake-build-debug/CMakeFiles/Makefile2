@@ -84,12 +84,12 @@ clean: CMakeFiles/ALLS.dir/clean
 CMakeFiles/ALLS.dir/all:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles\ALLS.dir\build.make CMakeFiles/ALLS.dir/depend
 	$(MAKE) $(MAKESILENT) -f CMakeFiles\ALLS.dir\build.make CMakeFiles/ALLS.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir="C:\Users\7906200\OneDrive - Hillsborough County Public Schools\Desktop Files\Documents\GitHub\ALLS\cmake-build-debug\CMakeFiles" --progress-num=1,2,3,4,5 "Built target ALLS"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir="C:\Users\7906200\OneDrive - Hillsborough County Public Schools\Desktop Files\Documents\GitHub\ALLS\cmake-build-debug\CMakeFiles" --progress-num=1,2,3,4,5,6 "Built target ALLS"
 .PHONY : CMakeFiles/ALLS.dir/all
 
 # Build rule for subdir invocation for target.
 CMakeFiles/ALLS.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start "C:\Users\7906200\OneDrive - Hillsborough County Public Schools\Desktop Files\Documents\GitHub\ALLS\cmake-build-debug\CMakeFiles" 5
+	$(CMAKE_COMMAND) -E cmake_progress_start "C:\Users\7906200\OneDrive - Hillsborough County Public Schools\Desktop Files\Documents\GitHub\ALLS\cmake-build-debug\CMakeFiles" 6
 	$(MAKE) $(MAKESILENT) -f CMakeFiles\Makefile2 CMakeFiles/ALLS.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start "C:\Users\7906200\OneDrive - Hillsborough County Public Schools\Desktop Files\Documents\GitHub\ALLS\cmake-build-debug\CMakeFiles" 0
 .PHONY : CMakeFiles/ALLS.dir/rule
@@ -101,7 +101,7 @@ ALLS: CMakeFiles/ALLS.dir/rule
 # codegen rule for target.
 CMakeFiles/ALLS.dir/codegen:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles\ALLS.dir\build.make CMakeFiles/ALLS.dir/codegen
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir="C:\Users\7906200\OneDrive - Hillsborough County Public Schools\Desktop Files\Documents\GitHub\ALLS\cmake-build-debug\CMakeFiles" --progress-num=1,2,3,4,5 "Finished codegen for target ALLS"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir="C:\Users\7906200\OneDrive - Hillsborough County Public Schools\Desktop Files\Documents\GitHub\ALLS\cmake-build-debug\CMakeFiles" --progress-num=1,2,3,4,5,6 "Finished codegen for target ALLS"
 .PHONY : CMakeFiles/ALLS.dir/codegen
 
 # clean rule for target.

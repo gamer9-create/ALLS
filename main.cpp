@@ -28,6 +28,8 @@ void client() {
         ClearBackground(WHITE);
         DrawText(std::to_string(GetTime()).c_str(), 0, 0, 20, BLACK);
 
+        InterpolateServerTime(GetFrameTime());
+
         Vector2 MyPlayerVelocity = {0, 0};
         if (IsKeyDown(KEY_A))
             MyPlayerVelocity.x -= 1;
