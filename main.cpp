@@ -3,51 +3,63 @@
 #include "raymath.h"
 #include "network/Client.h"
 #include "network/Server.h"
+#include "network/Utils.h"
+
+using namespace std;
+
+void process_player(long id, Player* player) {
+    player->LocalState.id = player->CurrentState.id;
+
+    DrawRectangle(player->LocalState.position.x, player->LocalState.position.y, 40, 40, RED);
+}
 
 void client() {
     InitWindow(640, 480, "SO GRAB A PLATE, HAVE A TASTE");
     SetTargetFPS(60);
 
     StartClient();
+    Player MyPlayer = Player();
     Rectangle MyPlayerHitbox = {0, 0, 40, 40};
     float MyPlayerSpeed = 150;
-
-    Vector2 LastPosition ={0, 0};
+    float MyPlayerRotation = 0;
 
     while (!WindowShouldClose()) {
         BeginDrawing();
         ClearBackground(WHITE);
         DrawText(std::to_string(GetTime()).c_str(), 0, 0, 20, BLACK);
 
-        Vector2 Movement = {0, 0};
+        Vector2 MyPlayerVelocity = {0, 0};
         if (IsKeyDown(KEY_A))
-            Movement.x -= 1;
+            MyPlayerVelocity.x -= 1;
         if (IsKeyDown(KEY_D))
-            Movement.x += 1;
+            MyPlayerVelocity.x += 1;
         if (IsKeyDown(KEY_W))
-            Movement.y -= 1;
+            MyPlayerVelocity.y -= 1;
         if (IsKeyDown(KEY_S))
-            Movement.y += 1;
-        Movement = Vector2Normalize(Movement);
-        MyPlayerHitbox.x += Movement.x * MyPlayerSpeed * GetFrameTime();
-        MyPlayerHitbox.y += Movement.y * MyPlayerSpeed * GetFrameTime();
+            MyPlayerVelocity.y += 1;
+        MyPlayerVelocity = Vector2Normalize(MyPlayerVelocity);
+        MyPlayerVelocity = Vector2Multiply(MyPlayerVelocity, {MyPlayerSpeed, MyPlayerSpeed});
+        MyPlayerHitbox.x += MyPlayerVelocity.x * GetFrameTime();
+        MyPlayerHitbox.y += MyPlayerVelocity.y * GetFrameTime();
 
-        Vector2 CurrentPosition = {MyPlayerHitbox.x, MyPlayerHitbox.y};
+        MyPlayer.CurrentState.position = {MyPlayerHitbox.x, MyPlayerHitbox.y};
+        MyPlayer.CurrentState.velocity = MyPlayerVelocity;
+        MyPlayer.CurrentState.rotation = MyPlayerRotation;
+        MyPlayer.CurrentState.speed = MyPlayerSpeed;
+        MyPlayer.LocalState = MyPlayer.CurrentState;
+        UpdateState(MyPlayer.CurrentState);
 
-        if (Vector2Distance(CurrentPosition, LastPosition) > 20)
-            UpdatePosition(MyPlayerHitbox.x, MyPlayerHitbox.y);
-
-        LastPosition = CurrentPosition;
-
-        std::vector<Vector2> positions = GetPositions();
-        positions.push_back({MyPlayerHitbox.x, MyPlayerHitbox.y});
-        for (Vector2 position : positions) {
-            DrawRectangle(position.x, position.y, 40, 40, RED);
+        for (auto &[id, player] : (*GetPlayers())) {
+            process_player(id,&player);
         }
+        process_player(0, &MyPlayer);
+
+        MyPlayer.LastState = MyPlayer.CurrentState;
 
         EndDrawing();
     }
 
+    std::cout << "stopping client!" << std::endl;
     StopClient();
 
     CloseWindow();

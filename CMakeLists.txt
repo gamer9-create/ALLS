@@ -13,6 +13,11 @@ add_executable(ALLS main.cpp
         network/Server.h
         network/Client.cpp
         network/Client.h
-        network/Utils.cpp)
+        network/Utils.h
+        network/Utils.cpp
+        network/Player.cpp
+        network/Player.h
+        network/Utils.cpp
+        network/Packet.h)
 target_link_libraries(ALLS PRIVATE raylib)
 target_link_libraries(ALLS PRIVATE unofficial::enet::enet winmm ws2_32)

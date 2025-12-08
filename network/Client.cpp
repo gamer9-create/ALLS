@@ -3,21 +3,29 @@
 //
 
 #include "Client.h"
-#include "raymath.h"
-#include <array>
-#include <cstring>
+#include "Utils.h"
 #include <iostream>
 #include <string>
 #include <thread>
+#include <unordered_map>
 #include <vector>
 
+#include "Packet.h"
+#include "Player.h"
 #include "enet/enet.h"
+
+using namespace std;
 
 std::atomic<bool> Running;
 
 ENetHost* client = {0};
 ENetPeer* peer = {0};
-std::vector<Vector2> client_positions;
+std::unordered_map<long, Player> client_players;
+
+double ServerTime = 0;
+double RealServerTime = 0;
+
+double LastTime = 0;
 
 void ClientThread(std::string IPAddress, int Port) {
     printf("yo everybody hush we startin the client\n");
@@ -58,27 +66,74 @@ void ClientThread(std::string IPAddress, int Port) {
       }
     printf("MAX RIZZ\n");
 
-    int number_of_floats = 0;
-    std::vector<Vector2> floats;
     while (Running.load(std::memory_order_relaxed)) {
-        int active = enet_host_service(client, &client_event, 500);
+        ServerTime = lerp(ServerTime, RealServerTime, 0.1f);
+        int active = enet_host_service(client, &client_event, 250);
         if (active > 0) {
             switch (client_event.type) {
                 case ENET_EVENT_TYPE_CONNECT:
                     break;
-                case ENET_EVENT_TYPE_RECEIVE:
-                    number_of_floats = (int) (sizeof(client_event.packet->data) / 4);
-                    floats.clear();
-                    for (int i = 0; i < number_of_floats/2; i++) {
-                        float x, y;
-                        int idx = i * 8;
-                        std::memcpy(&x, client_event.packet->data + idx, 4);
-                        std::memcpy(&y, client_event.packet->data + idx + 4, 4);
-                        floats.push_back({x,y});
+                case ENET_EVENT_TYPE_RECEIVE: {
+
+                    Packet packet;
+                    memcpy(&packet, client_event.packet->data, client_event.packet->dataLength);
+                    switch (packet.type) {
+                        case PLAYER_JOIN: {
+                            PlayerState s = {
+                                packet.playerJoin.id,
+                                packet.playerJoin.starting_location.x,
+                                packet.playerJoin.starting_location.y,
+                                0,0,
+                                0,0,packet.playerJoin.timestamp
+                            };
+                            client_players[packet.playerJoin.id] = {
+                                packet.playerJoin.id,
+                                s,s,
+                                std::vector<double>(), GetTimeUtils(), 0.1f, s, std::vector<PlayerState>()
+                            };
+                            break;
+                        }
+                        case PLAYER_LEFT: {
+                            if (client_players.contains(packet.playerLeft.id))
+                                client_players.erase(packet.playerLeft.id);
+                            break;
+                        }
+                        case PLAYER_UPDATE: {
+                            PlayerState newPlayerState = packet.playerState;
+                            PlayerState oldPlayerState;
+                            if (client_players.contains(newPlayerState.id)) {
+                                oldPlayerState = client_players.at(newPlayerState.id).CurrentState;
+                                client_players[newPlayerState.id].PreviousPlayerStates.push_back(oldPlayerState);
+                                if (client_players[newPlayerState.id].PreviousPlayerStates.size() > 5) {
+                                    client_players[newPlayerState.id].PreviousPlayerStates.erase(
+                                        client_players[newPlayerState.id].PreviousPlayerStates.begin());
+                                }
+
+                                client_players[newPlayerState.id].CurrentState = newPlayerState;
+                                client_players[newPlayerState.id].LastState = oldPlayerState;
+
+                                client_players[newPlayerState.id].UpdateTimes.push_back(
+                                    GetTimeUtils() - client_players[newPlayerState.id].LastUpdateTime);
+                                if (client_players[newPlayerState.id].UpdateTimes.size() > 5)
+                                    client_players[newPlayerState.id].UpdateTimes.erase(
+                                        client_players[newPlayerState.id].UpdateTimes.begin());
+                                float AddUp = 0;
+                                for (int i = 0; i < client_players[newPlayerState.id].UpdateTimes.size(); i++) {
+                                    AddUp += client_players[newPlayerState.id].UpdateTimes[i];
+                                }
+                                if (client_players[newPlayerState.id].UpdateTimes.size() != 0 && client_players[
+                                        newPlayerState.id].AverageUpdateTime != 0)
+                                    client_players[newPlayerState.id].AverageUpdateTime =
+                                            AddUp / client_players[newPlayerState.id].UpdateTimes.size();
+                                client_players[newPlayerState.id].LastUpdateTime = GetTimeUtils();
+                            }
+                            break;
+                        }
                     }
-                    client_positions = floats;
+
                     enet_packet_destroy(client_event.packet);
                     break;
+                }
                 case ENET_EVENT_TYPE_DISCONNECT:
                     break;
                 case ENET_EVENT_TYPE_NONE:
@@ -96,29 +151,28 @@ void StartClient(std::string IPAddress, int Port) {
     t.detach();
 }
 
-void UpdatePosition(float x, float y) {
-    if (peer != nullptr && client != nullptr) {
-        std::array<uint8_t, 8> position;
-        std::memcpy(position.data(), &x, 4);
-        std::memcpy(position.data() + 4, &y, 4);
-        auto bytes = std::bit_cast<std::array<uint8_t, 8>>(position);
-
-        ENetPacket* packet = enet_packet_create(&bytes, sizeof(bytes), ENET_PACKET_FLAG_RELIABLE);
-        enet_peer_send(peer, 0, packet);
-        //enet_packet_destroy(packet);
-    }
+std::unordered_map<long, Player> *GetPlayers() {
+    return &client_players;
 }
 
-std::vector<Vector2> GetPositions() {
-    return client_positions;
+void UpdateState(PlayerState state) {
+    if (client != nullptr && peer != nullptr) {
+        Packet myPacket;
+        myPacket.type = PLAYER_UPDATE;
+        myPacket.playerState = state;
+        ENetPacket* packet = enet_packet_create(&myPacket, sizeof(myPacket), 0);
+        enet_peer_send(peer, 0, packet);
+    }
 }
 
 void StopClient() {
     Running.store(false, std::memory_order_relaxed);
+    Sleep(100);
     uint8_t disconnected = false;
     if (client != nullptr) {
         ENetEvent client_event;
-        while (enet_host_service(client, &client_event, 300) > 0) {
+        enet_peer_disconnect(peer, 0);
+        while (enet_host_service(client, &client_event, 1000) > 0) {
             switch (client_event.type) {
                 case ENET_EVENT_TYPE_RECEIVE:
                     enet_packet_destroy(client_event.packet);
