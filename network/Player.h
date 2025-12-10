@@ -11,7 +11,6 @@
 struct PlayerJoin {
     long id = 0;
     Vector2 starting_location = {0, 0};
-    double timestamp = 0;
 };
 #pragma pack(pop)
 
@@ -36,9 +35,6 @@ struct Player {
     long PlayerID;
     PlayerState CurrentState = PlayerState();
     PlayerState LastState = PlayerState();
-    std::vector<double> UpdateTimes;
-    double LastUpdateTime = 0;
-    double AverageUpdateTime = 0;
     PlayerState LocalState = PlayerState();
     std::vector<PlayerState> PreviousPlayerStates;
 };

@@ -22,10 +22,7 @@ ENetHost* client = {0};
 ENetPeer* peer = {0};
 std::unordered_map<long, Player> client_players;
 
-double ServerTime = 0;
-double RealServerTime = 0;
-
-double LastTime = 0;
+double ServerTimeOffset = 0;
 
 void ClientThread(std::string IPAddress, int Port) {
     printf("yo everybody hush we startin the client\n");
@@ -76,19 +73,24 @@ void ClientThread(std::string IPAddress, int Port) {
 
                     Packet packet;
                     memcpy(&packet, client_event.packet->data, client_event.packet->dataLength);
+
                     switch (packet.type) {
+                        case TIME_SYNC: {
+                            double CurrentTime = GetTimeUtils();
+                            ServerTimeOffset = (packet.timestamp + ((double)client_event.peer->lastRoundTripTime)*0.5f) - CurrentTime;
+                            break;
+                        };
                         case PLAYER_JOIN: {
                             PlayerState s = {
                                 packet.playerJoin.id,
                                 packet.playerJoin.starting_location.x,
                                 packet.playerJoin.starting_location.y,
                                 0,0,
-                                0,0,packet.playerJoin.timestamp
+                                0,0,packet.timestamp
                             };
                             client_players[packet.playerJoin.id] = {
                                 packet.playerJoin.id,
-                                s,s,
-                                std::vector<double>(), GetTimeUtils(), 0.1f, s, std::vector<PlayerState>(),
+                                s,s,s, std::vector<PlayerState>(),
 
                             };
                             break;
@@ -103,29 +105,19 @@ void ClientThread(std::string IPAddress, int Port) {
                             PlayerState oldPlayerState;
                             if (client_players.contains(newPlayerState.id)) {
                                 oldPlayerState = client_players.at(newPlayerState.id).CurrentState;
-                                client_players[newPlayerState.id].PreviousPlayerStates.push_back(oldPlayerState);
-                                if (client_players[newPlayerState.id].PreviousPlayerStates.size() > 5) {
-                                    client_players[newPlayerState.id].PreviousPlayerStates.erase(
-                                        client_players[newPlayerState.id].PreviousPlayerStates.begin());
-                                }
 
                                 client_players[newPlayerState.id].CurrentState = newPlayerState;
                                 client_players[newPlayerState.id].LastState = oldPlayerState;
 
-                                client_players[newPlayerState.id].UpdateTimes.push_back(
-                                    GetTimeUtils() - client_players[newPlayerState.id].LastUpdateTime);
-                                if (client_players[newPlayerState.id].UpdateTimes.size() > 5)
-                                    client_players[newPlayerState.id].UpdateTimes.erase(
-                                        client_players[newPlayerState.id].UpdateTimes.begin());
-                                float AddUp = 0;
-                                for (int i = 0; i < client_players[newPlayerState.id].UpdateTimes.size(); i++) {
-                                    AddUp += client_players[newPlayerState.id].UpdateTimes[i];
-                                }
-                                if (client_players[newPlayerState.id].UpdateTimes.size() != 0 && client_players[
-                                        newPlayerState.id].AverageUpdateTime != 0)
-                                    client_players[newPlayerState.id].AverageUpdateTime =
-                                            AddUp / client_players[newPlayerState.id].UpdateTimes.size();
-                                client_players[newPlayerState.id].LastUpdateTime = GetTimeUtils();
+                                client_players[newPlayerState.id].PreviousPlayerStates.push_back(newPlayerState);
+                                client_players[newPlayerState.id].PreviousPlayerStates.erase(
+                                    std::remove_if(
+                                        client_players[newPlayerState.id].PreviousPlayerStates.begin(),
+                                        client_players[newPlayerState.id].PreviousPlayerStates.end(),
+                                        [](PlayerState & p) { return GetServerTime() - p.timestamp >= 2.0f; }
+                                    ),
+                                    client_players[newPlayerState.id].PreviousPlayerStates.end()
+                                );
                             }
                             break;
                         }
@@ -155,8 +147,8 @@ std::unordered_map<long, Player> *GetPlayers() {
     return &client_players;
 }
 
-void InterpolateServerTime(float dt) {
-    ServerTime = lerp(ServerTime, RealServerTime, 0.1f * dt);
+double GetServerTime() {
+    return GetTimeUtils() + ServerTimeOffset;
 }
 
 void UpdateState(PlayerState state) {

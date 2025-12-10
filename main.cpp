@@ -10,6 +10,40 @@ using namespace std;
 void process_player(long id, Player* player) {
     player->LocalState.id = player->CurrentState.id;
 
+    double render_time = GetServerTime() - 1.0f;
+    //cout << render_time << setprecision(1000) << endl;
+    PlayerState lowest = PlayerState();
+    lowest.timestamp = -1;
+    PlayerState highest = PlayerState();
+    highest.timestamp = 999999;
+
+    bool found = false;
+    bool found2 = false;
+
+    for (PlayerState &s : player->PreviousPlayerStates) {
+        if (s.timestamp < render_time && s.timestamp > lowest.timestamp) {
+            //cout << "time stamp " << s.timestamp << ", render time: " << render_time << setprecision(100000) << endl;
+            lowest = s;
+            found = true;
+        }
+    }
+
+    for (PlayerState &s : player->PreviousPlayerStates) {
+        if (s.timestamp > render_time && s.timestamp < highest.timestamp) {
+            highest = s;
+            found2 = true;
+        }
+    }
+
+    if (found && found2) {
+        double time_diff = highest.timestamp - lowest.timestamp;
+        float prog = (render_time - lowest.timestamp) / time_diff;
+
+
+        player->LocalState.position = {lowest.position.x + (highest.position.x - lowest.position.x) * prog, lowest.position.y + (highest.position.y - lowest.position.y) * prog};
+        cout << lowest.position.x << ", " << lowest.position.y << ", " << highest.position.x << ", " << highest.position.y << ", progress: " << prog << endl;
+    }
+
     DrawRectangle(player->LocalState.position.x, player->LocalState.position.y, 40, 40, RED);
 }
 
@@ -26,9 +60,8 @@ void client() {
     while (!WindowShouldClose()) {
         BeginDrawing();
         ClearBackground(WHITE);
-        DrawText(std::to_string(GetTime()).c_str(), 0, 0, 20, BLACK);
 
-        InterpolateServerTime(GetFrameTime());
+        DrawText(std::to_string(GetServerTime()).c_str(), 0, 0, 20, BLACK);
 
         Vector2 MyPlayerVelocity = {0, 0};
         if (IsKeyDown(KEY_A))
@@ -54,7 +87,7 @@ void client() {
         for (auto &[id, player] : (*GetPlayers())) {
             process_player(id,&player);
         }
-        process_player(0, &MyPlayer);
+        DrawRectangle(MyPlayer.LocalState.position.x, MyPlayer.LocalState.position.y, 40, 40, RED);
 
         MyPlayer.LastState = MyPlayer.CurrentState;
 

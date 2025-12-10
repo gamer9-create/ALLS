@@ -1,3 +1,0 @@
-C:/Users/7906200/OneDrive - Hillsborough County Public Schools/Desktop Files/Documents/GitHub/ALLS/cmake-build-debug/CMakeFiles/ALLS.dir
-C:/Users/7906200/OneDrive - Hillsborough County Public Schools/Desktop Files/Documents/GitHub/ALLS/cmake-build-debug/CMakeFiles/edit_cache.dir
-C:/Users/7906200/OneDrive - Hillsborough County Public Schools/Desktop Files/Documents/GitHub/ALLS/cmake-build-debug/CMakeFiles/rebuild_cache.dir

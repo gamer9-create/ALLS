@@ -13,6 +13,6 @@ void StopClient();
 
 std::unordered_map<long, Player> *GetPlayers();
 void UpdateState(PlayerState state);
-void InterpolateServerTime(float dt);
+double GetServerTime();
 
 #endif //ALLS_CLIENT_H

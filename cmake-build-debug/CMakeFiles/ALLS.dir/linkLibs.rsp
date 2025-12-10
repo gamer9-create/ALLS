@@ -1,1 +1,0 @@
- "C:/Users/7906200/.vcpkg-clion/vcpkg/installed/x64-mingw-dynamic/lib/libraylib.dll.a" "C:/Users/7906200/.vcpkg-clion/vcpkg/installed/x64-mingw-dynamic/debug/lib/libenet.a" -lwinmm -lws2_32 "C:/Users/7906200/.vcpkg-clion/vcpkg/installed/x64-mingw-dynamic/lib/libraylib.dll.a" -lkernel32 -luser32 -lgdi32 -lwinspool -lshell32 -lole32 -loleaut32 -luuid -lcomdlg32 -ladvapi32 

@@ -1,3 +1,0 @@
-C:\Users\7906200\CMake\bin\cmake.exe -E rm -f CMakeFiles\ALLS.dir/objects.a
-C:\portapps\clion-portable\app\bin\mingw\bin\ar.exe qc CMakeFiles\ALLS.dir/objects.a @CMakeFiles\ALLS.dir\objects1.rsp
-C:\portapps\clion-portable\app\bin\mingw\bin\g++.exe -g -Wl,--whole-archive CMakeFiles\ALLS.dir/objects.a -Wl,--no-whole-archive -o ALLS.exe -Wl,--out-implib,libALLS.dll.a -Wl,--major-image-version,0,--minor-image-version,0 @CMakeFiles\ALLS.dir\linkLibs.rsp

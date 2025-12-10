@@ -18,6 +18,8 @@ ENetHost* server = {0};
 bool ServerRunning = true;
 unordered_map<long, ENetPeer*> peers;
 
+double LastSyncedTime = GetTimeUtils();
+
 void StartServer(std::string IPAddress, int Port, int MaxClients) {
     ServerRunning = true;
     if (enet_initialize() != 0) {
@@ -54,17 +56,23 @@ void StartServer(std::string IPAddress, int Port, int MaxClients) {
                     for (auto [name,peer] : peers) {
                         auto* p = static_cast<Player *>(peer->data);
                         if (p->PlayerID != newPlayer->PlayerID) {
-                            Packet myPacket;
+                            Packet myPacket = {};
                             myPacket.type = PLAYER_JOIN;
                             myPacket.playerJoin.id = newPlayer->PlayerID;
                             myPacket.playerJoin.starting_location = {0, 0};
-                            myPacket.playerJoin.timestamp = GetTimeUtils();
                             ENetPacket* packet = enet_packet_create(&myPacket, sizeof(myPacket), ENET_PACKET_FLAG_RELIABLE);
                             enet_peer_send(peer, 0, packet);
 
+                            myPacket = {};
+                            myPacket.type = TIME_SYNC;
+                            myPacket.timestamp = GetTimeUtils();
+                            packet = enet_packet_create(&myPacket, sizeof(myPacket), 0);
+                            enet_peer_send(server_event.peer, 0, packet);
+
+                            myPacket = {};
+                            myPacket.type = PLAYER_JOIN;
                             myPacket.playerJoin.id = p->PlayerID;
                             myPacket.playerJoin.starting_location = p->CurrentState.position;
-                            myPacket.playerJoin.timestamp = GetTimeUtils();
                             packet = enet_packet_create(&myPacket, sizeof(myPacket), ENET_PACKET_FLAG_RELIABLE);
                             enet_peer_send(server_event.peer, 0, packet);
                         }
@@ -106,8 +114,8 @@ void StartServer(std::string IPAddress, int Port, int MaxClients) {
                             enet_peer_send(peer, 0, packet);
                         }
                     }
-                    delete oldPlayer;
                     peers.erase(oldPlayer->PlayerID);
+                    delete oldPlayer;
                     cout << "new size " << peers.size() << "\n";
                     break;
                 }
@@ -115,23 +123,35 @@ void StartServer(std::string IPAddress, int Port, int MaxClients) {
                     break;
             }
         }
+        if (GetTimeUtils() - LastSyncedTime >= 5) {
+            for (auto [id, peer] : peers) {
+                Packet myPacket;
+                myPacket.type = TIME_SYNC;
+                myPacket.timestamp = GetTimeUtils();
+                ENetPacket* packet = enet_packet_create(&myPacket, sizeof(myPacket), 0);
+                enet_peer_send(peer, 0, packet);
+            }
+            LastSyncedTime = GetTimeUtils();
+        }
         if (peers.size() > 1) {
 
             for (auto [id, peer] : peers) {
                 for (auto [other_id, other_peer] : peers) {
                     if (other_id != id) {
-                        Player* player = reinterpret_cast<Player *>(other_peer->data);
+                        auto* player = reinterpret_cast<Player *>(other_peer->data);
                         Packet myPacket;
                         myPacket.type = PLAYER_UPDATE;
                         myPacket.playerState= player->CurrentState;
+                        myPacket.playerState.timestamp = GetTimeUtils();
                         ENetPacket* packet = enet_packet_create(&myPacket, sizeof(myPacket), 0);
                         enet_peer_send(peer, 0, packet);
                     }
                 }
             }
 
-            enet_host_flush(server);
         }
+
+        enet_host_flush(server);
     }
 }
 

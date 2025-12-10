@@ -1,4 +1,0 @@
-C:\Users\7906200\CMake\bin\cmake.exe -DCMAKE_BUILD_TYPE=Debug -G "MinGW Makefiles" -S "C:\Users\7906200\OneDrive - Hillsborough County Public Schools\Desktop Files\Documents\GitHub\ALLS" -B "C:\Users\7906200\OneDrive - Hillsborough County Public Schools\Desktop Files\Documents\GitHub\ALLS\cmake-build-debug"
--- Configuring done (0.6s)
--- Generating done (0.1s)
--- Build files have been written to: C:/Users/7906200/OneDrive - Hillsborough County Public Schools/Desktop Files/Documents/GitHub/ALLS/cmake-build-debug
