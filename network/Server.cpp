@@ -139,12 +139,15 @@ void StartServer(std::string IPAddress, int Port, int MaxClients) {
                 for (auto [other_id, other_peer] : peers) {
                     if (other_id != id) {
                         auto* player = reinterpret_cast<Player *>(other_peer->data);
-                        Packet myPacket;
-                        myPacket.type = PLAYER_UPDATE;
-                        myPacket.playerState= player->CurrentState;
-                        myPacket.playerState.timestamp = GetTimeUtils();
-                        ENetPacket* packet = enet_packet_create(&myPacket, sizeof(myPacket), 0);
-                        enet_peer_send(peer, 0, packet);
+                        if (Vector2Distance(player->LocalState.position, player->CurrentState.position) > 10) {
+                            Packet myPacket;
+                            myPacket.type = PLAYER_UPDATE;
+                            myPacket.playerState= player->CurrentState;
+                            player->LocalState = player->CurrentState;
+                            myPacket.playerState.timestamp = GetTimeUtils();
+                            ENetPacket* packet = enet_packet_create(&myPacket, sizeof(myPacket), 0);
+                            enet_peer_send(peer, 0, packet);
+                        }
                     }
                 }
             }

@@ -114,7 +114,7 @@ void ClientThread(std::string IPAddress, int Port) {
                                     std::remove_if(
                                         client_players[newPlayerState.id].PreviousPlayerStates.begin(),
                                         client_players[newPlayerState.id].PreviousPlayerStates.end(),
-                                        [](PlayerState & p) { return GetServerTime() - p.timestamp >= 2.0f; }
+                                        [](PlayerState & p) { return GetServerTime() - p.timestamp >= 10.0f; }
                                     ),
                                     client_players[newPlayerState.id].PreviousPlayerStates.end()
                                 );

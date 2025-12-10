@@ -1,3 +1,4 @@
+#include <float.h>
 #include <iostream>
 #include "raylib.h"
 #include "raymath.h"
@@ -10,38 +11,39 @@ using namespace std;
 void process_player(long id, Player* player) {
     player->LocalState.id = player->CurrentState.id;
 
-    double render_time = GetServerTime() - 1.0f;
+    double render_time = GetServerTime() - 3.0f;
     //cout << render_time << setprecision(1000) << endl;
-    PlayerState lowest = PlayerState();
-    lowest.timestamp = -1;
-    PlayerState highest = PlayerState();
-    highest.timestamp = 999999;
+    PlayerState *lowest = new PlayerState();
+    lowest->timestamp = -1;
+    PlayerState *highest = new PlayerState();
+    highest->timestamp = FLT_MAX;
 
     bool found = false;
     bool found2 = false;
 
     for (PlayerState &s : player->PreviousPlayerStates) {
-        if (s.timestamp < render_time && s.timestamp > lowest.timestamp) {
+        if (s.timestamp < render_time && s.timestamp > lowest->timestamp) {
             //cout << "time stamp " << s.timestamp << ", render time: " << render_time << setprecision(100000) << endl;
-            lowest = s;
+            lowest = &s;
             found = true;
         }
     }
 
     for (PlayerState &s : player->PreviousPlayerStates) {
-        if (s.timestamp > render_time && s.timestamp < highest.timestamp) {
-            highest = s;
+        if (s.timestamp > render_time && s.timestamp < highest->timestamp && s.position != lowest->position) {
+            highest = &s;
             found2 = true;
         }
     }
 
+    cout << found << " " << found2 << endl;
+
     if (found && found2) {
-        double time_diff = highest.timestamp - lowest.timestamp;
-        float prog = (render_time - lowest.timestamp) / time_diff;
+        double time_diff = highest->timestamp - lowest->timestamp;
+        float prog = (render_time - lowest->timestamp) / time_diff;
 
-
-        player->LocalState.position = {lowest.position.x + (highest.position.x - lowest.position.x) * prog, lowest.position.y + (highest.position.y - lowest.position.y) * prog};
-        cout << lowest.position.x << ", " << lowest.position.y << ", " << highest.position.x << ", " << highest.position.y << ", progress: " << prog << endl;
+        player->LocalState.position = {lowest->position.x + (highest->position.x - lowest->position.x) * prog, lowest->position.y + (highest->position.y - lowest->position.y) * prog};
+        cout << lowest->position.x << ", " << lowest->position.y << ", " << highest->position.x << ", " << highest->position.y << ", progress: " << prog << endl;
     }
 
     DrawRectangle(player->LocalState.position.x, player->LocalState.position.y, 40, 40, RED);
